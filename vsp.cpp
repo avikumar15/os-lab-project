@@ -84,7 +84,7 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
 
     for(int i=0; i<n; i++) {
         time.push_back({p[i].arr_time,{1,p[i]}});
-        time.push_back({p[i].arr_time+p[i].leave_time,{0,p[i]}});
+        // time.push_back({p[i].arr_time+p[i].leave_time,{0,p[i]}});
     }
 
     // will sort time according to first int bby default.
@@ -98,12 +98,12 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
         cout<<"Process pid is "<<time[i].second.second.pid<<endl<<endl;
     }
 
-    for(int i=0; i<n; i++) {
+    for(int i=0; i<time.size(); i++) {
         
         int j=i;
 
         while(j<n && time[j].first==time[i].first && time[j].second.first==0 ) {
-            
+            // cout<<"hit1 ";
             for(int k=0; k<pt.ids.size(); k++) {
                 if(pt.ids[k]==time[j].second.second.pid) {
                     pt.ids[k]=-1;
@@ -117,16 +117,29 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
         while(j<n && time[j].first==time[i].first) {
             ps.push(time[j].second.second);
             Process ffront = ps.front();
+            // cout<<"hit2 ";
 
             for(int k=0; k<(int)(pt.ids.size())-1; k++) {
-                if(pt.ids[k]==-1 && pt.ids[k+1]==-1 && pt.val[k+1]-pt.val[k]>=ffront.effectiveAddr) {
-                    pt.ids.insert(pt.ids.begin()+k+1,ffront.pid);
-                    pt.val.insert(pt.val.begin()+k+1,ffront.effectiveAddr+pt.val[k]);
+                if(pt.ids[k]==-1 && pt.ids[k+1]==-1 && pt.val[k+1]-pt.val[k]+1>=ffront.effectiveAddr) {
+                    pt.ids.insert(pt.ids.begin()+k+1,{ffront.pid,-1});
+                    pt.val.insert(pt.val.begin()+k+1,{ffront.effectiveAddr+pt.val[k]-1, ffront.effectiveAddr+pt.val[k]});
                     ps.pop();
+                    time.push_back({ffront.leave_time+time[i].first,{0,ffront}});
+                    sort(time.begin(),time.end(),comp);
+                    n=time.size();
                     break;
                 }
             }
+
+            j++;
         }
+
+        cout<<"The partition at i = "<<i<<" t = "<<time[i].first<<endl;
+        for(int k=0; k<(int)pt.ids.size(); k++) {
+            if(pt.ids[k]!=-1)
+            cout<<pt.ids[k]<<" "<<pt.val[k]<<endl;
+        }
+        cout<<endl;
 
         i=j-1;
 
