@@ -78,6 +78,7 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
     vector<Process> ps;
     Partition pt(MEM_SIZE);
     int n=p.size();
+    double t=0;
 
     // making a vector of time which will store a - pair of  < int and pair of < Process and int > > which represents 
     // the time at which event occurs and the process and '1' if arrival time, '0' means leaving time
@@ -108,6 +109,7 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
             for(int k=0; k<pt.ids.size(); k++) {
                 if(pt.ids[k]==time[j].second.second.pid) {
                     pt.ids[k]=-1;
+                    t+=time[j].first-time[j].second.second.arr_time;
                     break;
                 }
             }
@@ -174,6 +176,8 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
         i=j-1;
 
     }
+
+    cout<<setprecision(5)<<"Avg turnaround time = "<<(t/p.size())<<endl;
 
 
 }
