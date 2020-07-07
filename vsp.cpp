@@ -184,6 +184,143 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
 
 void bestFit(vector<Process> p, int MEM_SIZE) {
     
+    vector<Process> ps;
+    Partition pt(MEM_SIZE);
+    int n=p.size();
+    double t=0;
+
+    // making a vector of time which will store a - pair of  < int and pair of < Process and int > > which represents 
+    // the time at which event occurs and the process and '1' if arrival time, '0' means leaving time
+    vector<pair<int,pair<int,Process>>> time;
+
+    for(int i=0; i<n; i++) {
+        time.push_back({p[i].arr_time,{1,p[i]}});
+    }
+
+    // will sort time according to first int bby default.
+    sort(time.begin(),time.end(),comp);
+
+    n=time.size();
+
+    cout<<"\n******TIME*********\n";
+    for(int i=0; i<n; i++) {
+        cout<<"Time is- "<<time[i].first<<" and type is "<<time[i].second.first<<endl;
+        cout<<"Process pid is "<<time[i].second.second.pid<<endl<<endl;
+    }
+
+    for(int i=0; i<time.size(); i++) {
+        
+        int j=i;
+
+        while(j<n && time[j].first==time[i].first && time[j].second.first==0 ) {
+            // cout<<"hit1 ";
+            for(int k=0; k<pt.ids.size(); k++) {
+                if(pt.ids[k]==time[j].second.second.pid) {
+                    pt.ids[k]=-1;
+                    t+=time[j].first-time[j].second.second.arr_time;
+                    break;
+                }
+            }
+            
+            j++;
+        }
+        // cout<<"j is "<<j<<" n is "<<n<<" timejf = "<<time[j].first<<" timeif = "<<time[i].first<<endl;
+        while(j<n && (time[j].first==time[i].first)) {
+            ps.push_back(time[j].second.second);
+            j++;
+        }
+        cout<<"ps ka size = "<<ps.size()<<endl;
+            int index=0;
+            
+            while(index<ps.size()) {
+                // int psSize=ps.size();
+                Process ffront = ps[index];
+                // to store details of hole
+                map<int,pair<int,Process>> mmap;
+                int f=-1;
+
+                ffront = ps[index];
+
+                for(int k=0; k<(int)(pt.ids.size())-1; k++) {
+                    int pp=k;
+
+                    while(pp<pt.ids.size() && pt.ids[pp]==-1) {
+                        pp++;
+                    }
+
+                    if(pt.ids[k]==-1 && pt.ids[k+1]==-1 && pt.val[pp-1]-pt.val[k]+1>=ffront.effectiveAddr) {
+                        //pt.ids.insert(pt.ids.begin()+k+1,{ffront.pid,-1});
+                        //pt.val.insert(pt.val.begin()+k+1,{ffront.effectiveAddr+pt.val[k]-1, ffront.effectiveAddr+pt.val[k]});
+                        //ps.pop();
+                        //ps.erase(ps.begin()+index,ps.begin()+index+1);
+                        //time.push_back({ffront.leave_time+time[i].first,{0,ffront}});
+                        mmap[pt.val[pp-1]-pt.val[k]+1]=make_pair(k,ffront);
+                        f=1;
+                        //cout<<"So now the id of inserted is "<<ffront.pid<<" and its leaving time will be "<<ffront.leave_time+time[i].first<<endl;
+                        //sort(time.begin(),time.end(),comp);
+                        //n=time.size();
+                        //index--;
+                        k=pp-1;
+                        // index=ps.size();
+                        //break;
+                    }
+                }
+
+                if(f==-1) {
+                    index++;
+                    continue;
+                } else {
+                    for(auto ii: mmap) {
+
+                        int k=ii.second.first;
+                        ffront=ii.second.second;
+
+
+                        pt.ids.insert(pt.ids.begin()+k+1,{ffront.pid,-1});
+                        pt.val.insert(pt.val.begin()+k+1,{ffront.effectiveAddr+pt.val[k]-1, ffront.effectiveAddr+pt.val[k]});
+                        //ps.pop();
+                        ps.erase(ps.begin()+index,ps.begin()+index+1);
+                        time.push_back({ffront.leave_time+time[i].first,{0,ffront}});
+
+                        //cout<<"So now the id of inserted is "<<ffront.pid<<" and its leaving time will be "<<ffront.leave_time+time[i].first<<endl;
+                        sort(time.begin(),time.end(),comp);
+                        n=time.size();
+                        index--;
+
+                        // since only the min hole that can fit will be used
+                        break;
+                    }
+                }
+
+
+                // cout<<"ps now is like : \n";
+                // for(int the=0; the<ps.size(); the++) {
+                //     cout<<ps[the].pid<<" ";
+                // }
+                // cout<<endl;
+                
+                index++;
+            }
+
+
+        // cout<<"ps2 now is like : \n";
+        // for(int the=0; the<ps.size(); the++) {
+        //     cout<<ps[the].pid<<" ";
+        // }
+        // cout<<endl;
+        //cout<<"The partition at i = "<<i<<" t = "<<time[i].first<<" now i assigned as "<<j-1<<endl;
+        for(int k=0; k<(int)pt.ids.size(); k++) {
+           if(pt.ids[k]!=-1)
+            cout<<pt.ids[k]<<" "<<pt.val[k]<<endl;
+        }
+        cout<<endl;
+
+        i=j-1;
+
+    }
+
+    cout<<setprecision(5)<<"Avg turnaround time = "<<(t/p.size())<<endl;
+
 }
 
 void worstFit(vector<Process> p, int MEM_SIZE) {
