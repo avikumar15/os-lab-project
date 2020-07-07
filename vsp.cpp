@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #define cin std::cin
+#define cout std::cout
 
 using namespace std;
 
@@ -74,7 +75,7 @@ class Partition {
 
 void firstFit(vector<Process> p, int MEM_SIZE) {
     
-    queue<Process> ps;
+    vector<Process> ps;
     Partition pt(MEM_SIZE);
     int n=p.size();
 
@@ -113,30 +114,59 @@ void firstFit(vector<Process> p, int MEM_SIZE) {
             
             j++;
         }
-
-        while(j<n && time[j].first==time[i].first) {
-            ps.push(time[j].second.second);
-            Process ffront = ps.front();
-            // cout<<"hit2 ";
-
-            for(int k=0; k<(int)(pt.ids.size())-1; k++) {
-                if(pt.ids[k]==-1 && pt.ids[k+1]==-1 && pt.val[k+1]-pt.val[k]+1>=ffront.effectiveAddr) {
-                    pt.ids.insert(pt.ids.begin()+k+1,{ffront.pid,-1});
-                    pt.val.insert(pt.val.begin()+k+1,{ffront.effectiveAddr+pt.val[k]-1, ffront.effectiveAddr+pt.val[k]});
-                    ps.pop();
-                    time.push_back({ffront.leave_time+time[i].first,{0,ffront}});
-                    sort(time.begin(),time.end(),comp);
-                    n=time.size();
-                    break;
-                }
-            }
-
+        // cout<<"j is "<<j<<" n is "<<n<<" timejf = "<<time[j].first<<" timeif = "<<time[i].first<<endl;
+        while(j<n && (time[j].first==time[i].first)) {
+            ps.push_back(time[j].second.second);
             j++;
         }
+        cout<<"ps ka size = "<<ps.size()<<endl;
+            int index=0;
+            // int psSize=ps.size();
+            
+            while(index<ps.size()) {
+                Process ffront = ps[index];
+                for(int k=0; k<(int)(pt.ids.size())-1; k++) {
+                    // if(ffront.pid==7) {
+                    //     cout<<k<<" "<<pt.ids[k]<<" "<<pt.ids[k+1]<<" "<<pt.val[k+1]<<" "<<pt.val[k]<<" "<<ffront.effectiveAddr<<endl;
+                    // }
+                    int pp=k;
 
-        cout<<"The partition at i = "<<i<<" t = "<<time[i].first<<endl;
+                    while(pp<pt.ids.size() && pt.ids[pp]==-1) {
+                        pp++;
+
+                    }
+                    if(pt.ids[k]==-1 && pt.ids[k+1]==-1 && pt.val[pp-1]-pt.val[k]+1>=ffront.effectiveAddr) {
+                        pt.ids.insert(pt.ids.begin()+k+1,{ffront.pid,-1});
+                        pt.val.insert(pt.val.begin()+k+1,{ffront.effectiveAddr+pt.val[k]-1, ffront.effectiveAddr+pt.val[k]});
+                        //ps.pop();
+                        ps.erase(ps.begin()+index,ps.begin()+index+1);
+                        time.push_back({ffront.leave_time+time[i].first,{0,ffront}});
+                        //cout<<"So now the id of inserted is "<<ffront.pid<<" and its leaving time will be "<<ffront.leave_time+time[i].first<<endl;
+                        sort(time.begin(),time.end(),comp);
+                        n=time.size();
+                        index--;
+                        // index=ps.size();
+                        break;
+                    }
+                }
+                // cout<<"ps now is like : \n";
+                // for(int the=0; the<ps.size(); the++) {
+                //     cout<<ps[the].pid<<" ";
+                // }
+                // cout<<endl;
+                
+                index++;
+            }
+
+
+        // cout<<"ps2 now is like : \n";
+        // for(int the=0; the<ps.size(); the++) {
+        //     cout<<ps[the].pid<<" ";
+        // }
+        // cout<<endl;
+        cout<<"The partition at i = "<<i<<" t = "<<time[i].first<<" now i assigned as "<<j-1<<endl;
         for(int k=0; k<(int)pt.ids.size(); k++) {
-            if(pt.ids[k]!=-1)
+           if(pt.ids[k]!=-1)
             cout<<pt.ids[k]<<" "<<pt.val[k]<<endl;
         }
         cout<<endl;
